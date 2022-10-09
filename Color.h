@@ -50,19 +50,6 @@ public:
 		return *this;
 	}
 
-	float GetSquardDistance(Color& other) {
-		float sum = 0;
-		for (int channel = RED; channel < ALPHA; channel++) {
-			float diff = rgba[channel] - other[channel];
-			sum += diff * diff;
-		}
-		return sum;
-	}
-
-	float GetDistance(Color& other) {
-		return sqrt(GetSquardDistance(other));
-	}
-
 	bool operator== (Color& other) {
 		for (int channel = RED; channel <= ALPHA; channel++) {
 			if ((*this)[channel] != other[channel])
@@ -79,6 +66,66 @@ public:
 				return false;
 		}
 		return false;
+	}
+
+	Color operator* (float multiplier) {
+		Color result;
+		for (int i = 0; i < 3; i++) {
+			result.Set(i, rgba[i] * multiplier);
+		}
+		result.Set(3, rgba[3]);
+		return result;
+	}
+
+	Color operator/ (float divider) {
+		Color result;
+		for (int i = 0; i < 3; i++) {
+			result.Set(i, rgba[i] / divider);
+		}
+		result.Set(3, rgba[3]);
+		return result;
+	}
+
+	Color operator+ (Color addend) {
+		Color result;
+		for (int i = 0; i < 3; i++) {
+			result.Set(i, rgba[i] + addend[i]);
+		}
+		result.Set(3, rgba[3]);
+		return result;
+	}
+
+	Color operator- (Color subtraction) {
+		Color result;
+		for (int i = 0; i < 3; i++) {
+			result.Set(i, rgba[i] - subtraction[i]);
+		}
+		result.Set(3, rgba[3]);
+		return result;
+	}
+
+	Color GetComplementaryColor() {
+		Color result;
+
+		result.rgba[0] = 255 - rgba[0];
+		result.rgba[1] = 255 - rgba[1];
+		result.rgba[2] = 255 - rgba[2];
+		result.rgba[3] = rgba[3];
+
+		return result;
+	}
+
+	float GetSquardDistance(Color& other) {
+		float sum = 0;
+		for (int channel = RED; channel < ALPHA; channel++) {
+			float diff = rgba[channel] - other[channel];
+			sum += diff * diff;
+		}
+		return sum;
+	}
+
+	float GetDistance(Color& other) {
+		return sqrt(GetSquardDistance(other));
 	}
 };
 

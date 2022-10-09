@@ -9,11 +9,18 @@ private:
 	uchar* rgba;
 
 public:
-	uchar operator[] (int index) {
-		if (!rgba || index > 3) return 0;
-		return rgba[index];
+	//=====================================================
+	// Get the value in the channel.
+	//=====================================================
+	uchar operator[] (int channel) {
+		if (!rgba || channel > 3) return 0;
+		return rgba[channel];
 	}
 
+	//=====================================================
+	// Set the value of the channel with 
+	// out-of-range guard.
+	//=====================================================
 	bool Set(int channel, long long int val) {
 		if (!rgba || channel < 0 || channel > 3) {
 			return false;
@@ -31,6 +38,9 @@ public:
 		return true;
 	}
 
+	//=====================================================
+	// Set all channels except alpha with the given value.
+	//=====================================================
 	Pixel& operator= (uchar val) {
 		if (!rgba) return *this;
 
@@ -41,12 +51,18 @@ public:
 		return *this;
 	}
 
+	//=====================================================
+	// Bind the pixel data of an image into this class.
+	//=====================================================
 	Pixel& operator= (uchar* ptr) {
 		rgba = ptr;
 
 		return *this;
 	}
 
+	//=====================================================
+	// Change the color of this pixel.
+	//=====================================================
 	Pixel& operator= (Color4c color) {
 		if (!rgba) return *this;
 
@@ -58,6 +74,9 @@ public:
 		return *this;
 	}
 
+	//=====================================================
+	// Change the color of this pixel.
+	//=====================================================
 	Pixel& operator= (Color4f color) {
 		if (!rgba) return *this;
 
@@ -69,12 +88,26 @@ public:
 		return *this;
 	}
 
+	//=====================================================
+	// Get the color of this pixel.
+	//=====================================================
 	Color4c GetColor4c() {
 		return Color4c(rgba[0], rgba[1], rgba[2], rgba[3]);
 	}
 
+	//=====================================================
+	// Get the color of this pixel.
+	//=====================================================
 	Color4f GetColor4f() {
 		return Color4f(rgba[0], rgba[1], rgba[2], rgba[3]);
 	}
+
+private:
+	//=====================================================
+	// Lock original assign function for safety guard.
+	//=====================================================
+	Pixel& operator= (Pixel color) { };
+	Pixel& operator= (Pixel& color) { };
+	Pixel& operator= (const Pixel& color) { };
 };
 

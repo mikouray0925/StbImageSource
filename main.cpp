@@ -1,10 +1,11 @@
-#include "StbImage.h"
+#include "StbCanvas.h"
 
 int main() {
-	StbImage image("axe.png");
-	image.ToGrayscale();
-	image.FlipHonrizontally();
-	image.SavePngFile("axe2.png");
-	image.SaveJpgFile("axe2.jpg");
-	image.SaveTgaFile("axe2.tga");
+	StbImage axe1("axe.png"), axe2("axe.png");
+	StbCanvas canvas(axe1.GetHeight(), axe1.GetWidth());
+	canvas.PutImage(axe1);
+	canvas.PutImage(axe2);
+	axe2.FlipVertically();
+	axe2.ToComplementary();
+	canvas.ToStbImage().SavePngFile("2axe.png");
 }
