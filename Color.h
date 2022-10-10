@@ -6,12 +6,7 @@ typedef unsigned char uchar;
 
 template <typename T>
 class Color {
-protected:
-	T rgba[4];
-
 public:
-	static const int RED = 0, GREEN = 1, BLUE = 2, ALPHA = 3;
-
 	Color(T _r = 255, T _g = 255, T _b = 255, T _a = 255) {
 		Set(0, _r);
 		Set(1, _g);
@@ -42,10 +37,12 @@ public:
 	}
 
 	Color& operator= (T val) {
-		Set(RED  , val);
-		Set(GREEN, val);
-		Set(BLUE , val);
-		Set(ALPHA, val);
+		if (val > 255) val = 255;
+		if (val < 0) val = 0;
+
+		rgba[RED  ] = val;
+		rgba[GREEN] = val;
+		rgba[BLUE ] = val;
 
 		return *this;
 	}
@@ -68,8 +65,8 @@ public:
 		return false;
 	}
 
-	Color operator* (float multiplier) {
-		Color result;
+	Color<float> operator* (float multiplier) {
+		Color<float> result;
 		for (int i = 0; i < 3; i++) {
 			result.Set(i, rgba[i] * multiplier);
 		}
@@ -77,8 +74,8 @@ public:
 		return result;
 	}
 
-	Color operator/ (float divider) {
-		Color result;
+	Color<float> operator/ (float divider) {
+		Color<float> result;
 		for (int i = 0; i < 3; i++) {
 			result.Set(i, rgba[i] / divider);
 		}
@@ -86,8 +83,9 @@ public:
 		return result;
 	}
 
-	Color operator+ (Color addend) {
-		Color result;
+	template <typename A>
+	Color<float> operator+ (Color<A> addend) {
+		Color<float> result;
 		for (int i = 0; i < 3; i++) {
 			result.Set(i, rgba[i] + addend[i]);
 		}
@@ -95,8 +93,9 @@ public:
 		return result;
 	}
 
-	Color operator- (Color subtraction) {
-		Color result;
+	template <typename A>
+	Color<float> operator- (Color<A> subtraction) {
+		Color<float> result;
 		for (int i = 0; i < 3; i++) {
 			result.Set(i, rgba[i] - subtraction[i]);
 		}
@@ -115,7 +114,8 @@ public:
 		return result;
 	}
 
-	float GetSquardDistance(Color& other) {
+	template <typename A>
+	float GetSquardDistance(Color<A>& other) {
 		float sum = 0;
 		for (int channel = RED; channel < ALPHA; channel++) {
 			float diff = rgba[channel] - other[channel];
@@ -124,9 +124,16 @@ public:
 		return sum;
 	}
 
-	float GetDistance(Color& other) {
+	template <typename A>
+	float GetDistance(Color<A>& other) {
 		return sqrt(GetSquardDistance(other));
 	}
+
+public:
+	static const int RED = 0, GREEN = 1, BLUE = 2, ALPHA = 3;
+
+ protected:
+	 T rgba[4];
 };
 
 typedef Color<uchar> Color4c;

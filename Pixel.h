@@ -3,12 +3,6 @@
 
 class Pixel {
 public:
-	static const int RED = 0, GREEN = 1, BLUE = 2, ALPHA = 3;
-
-private:
-	uchar* rgba;
-
-public:
 	//=====================================================
 	// Get the value in the channel.
 	//=====================================================
@@ -43,10 +37,12 @@ public:
 	//=====================================================
 	Pixel& operator= (uchar val) {
 		if (!rgba) return *this;
+		if (val > 255) val = 255;
+		if (val < 0) val = 0;
 
-		Set(RED  , val);
-		Set(GREEN, val);
-		Set(BLUE , val);
+		rgba[RED] = val;
+		rgba[GREEN] = val;
+		rgba[BLUE] = val;
 
 		return *this;
 	}
@@ -109,5 +105,11 @@ private:
 	Pixel& operator= (Pixel color) { };
 	Pixel& operator= (Pixel& color) { };
 	Pixel& operator= (const Pixel& color) { };
+
+public:
+	static const int RED = 0, GREEN = 1, BLUE = 2, ALPHA = 3;
+
+private:
+	uchar* rgba = 0;
 };
 

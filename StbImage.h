@@ -8,20 +8,6 @@
 #include <string>
 
 class StbImage {
-private:
-	// The all pixel data of the image.
-	uchar* buffer;
-	// Help visit each pixel in buffer one by one.
-	Pixel* pixels;
-	// Help visit each pixel in buffer row by row.
-	Pixel** pixelMap;
-	// The heigt of this image.
-	int height = 0;
-	// The width of this image.
-	int width = 0;
-	// The number of bytes of each pixel.
-	int bytesPerPixel = 4;
-
 public:
 	//=====================================================
 	// Load the image from  the file path into this class.
@@ -68,7 +54,7 @@ public:
 	//=====================================================
 	StbImage& operator= (const StbImage& other) {
 		if (buffer) {
-			delete buffer;
+			free(buffer);
 			delete pixels;
 			delete pixelMap;
 		}
@@ -249,6 +235,31 @@ public:
 		return true;
 	}
 
+	//=====================================================
+	// Resize this image with the given size. 
+	// Use the gaussian filter to get the average color 
+	// from each area of specified size of the raw image. 
+	//=====================================================
+	bool Resize(int newHeight, int newWidth, int filterSize = 5) {
+		if (!buffer) return false;
+		return Scale(newHeight / height, newWidth / width, filterSize);
+	}
+
+	//=====================================================
+	// Multiply the alpha channel of each pixel with the
+	// multiplier.
+	//=====================================================
+	bool AdjustOpacity(float multiplier) {
+		if (!buffer) return false;
+
+		int num = GetNumOfPixel();
+		for (int i = 0; i < num; i++) {
+			pixels[i].Set(3, pixels[i][3] * multiplier);
+		}
+
+		return true;
+	}
+
 private:
 	void BindBufferToPixelMap() {
 		pixels = new Pixel[height * width];
@@ -291,5 +302,19 @@ private:
 			round(alphaSum / sum)
 		);
 	}
+
+private:
+	// The all pixel data of the image.
+	uchar* buffer = 0;
+	// Help visit each pixel in buffer one by one.
+	Pixel* pixels = 0;
+	// Help visit each pixel in buffer row by row.
+	Pixel** pixelMap = 0;
+	// The heigt of this image.
+	int height = 0;
+	// The width of this image.
+	int width = 0;
+	// The number of bytes of each pixel.
+	int bytesPerPixel = 4;
 
 };
