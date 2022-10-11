@@ -1,13 +1,22 @@
-#include "StbCanvas.h"
+#include "MikouImage.h"
+#include "string"
 
 int main() {
-	StbImage axe1("axe.png"), axe2("axe.png");
-	StbCanvas canvas(axe1.GetHeight(), axe1.GetWidth());
-	canvas.DrawImage(axe2, 4, 4);
-	canvas[0].image->ToComplementary();
-	canvas[0].image->Scale(1, -1, 1);
-	canvas.PutImage(axe1);
-	canvas.ToStbImage().SavePngFile("2axe.png");
-	axe2.Resize(256, 256, 4);
-	axe2.SavePngFile("axe2.png");
+	char order;
+	while (cin >> order) {
+		if (order == '.') {
+			string inputPath, outputPath;
+			cin >> inputPath >> outputPath;
+			StbImage img(inputPath);
+			DecodeMikouImage(img).SavePngFile(outputPath);
+		}
+		else if (order == '@') {
+			string inputPath, outputPath;
+			cin >> inputPath >> outputPath;
+			int tileNum, brightness;
+			cin >> tileNum >> brightness;
+			StbImage img(inputPath);
+			MikouImage(img, tileNum, brightness).ToEncodedStbImage().SavePngFile(outputPath);
+		}
+	}
 }

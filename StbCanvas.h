@@ -62,14 +62,12 @@ public:
 					if (CanvasIndexJ>= width) break;
 
 					if ((*layer.image)[i][j][3] == 0) continue;
-					if (canvas[CanvasIndexI][CanvasIndexJ][3] == 0) {
-						canvas[CanvasIndexI][CanvasIndexJ].Set(3, 255);
-					}
 
 					float imgProp = (*layer.image)[i][j][3] / 255.0f;
 					float bgdProp = 1.0f - imgProp;
 					canvas[CanvasIndexI][CanvasIndexJ] = (*layer.image)[i][j].GetColor4f() * imgProp + 
 						                                 canvas[CanvasIndexI][CanvasIndexJ].GetColor4f() * bgdProp;
+					canvas[CanvasIndexI][CanvasIndexJ].Set(3, 255);
 				}
 			}
 		}
@@ -77,7 +75,7 @@ public:
 		return canvas;
 	}
 
-private:
+protected:
 	int height;
 	int width;
 	vector<StbImage> images;

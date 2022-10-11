@@ -6,14 +6,30 @@
 #include "MyMath.h"
 #include "Pixel.h"
 #include <string>
+#include <iostream>
 
 class StbImage {
 public:
+	//=====================================================
+	// Default constructor.
+	//=====================================================
+	StbImage() {
+		buffer = 0;
+		pixels = 0;
+		pixelMap = 0;
+		height = 0;
+		width = 0;
+		bytesPerPixel = 4;
+	}
+
 	//=====================================================
 	// Load the image from  the file path into this class.
 	//=====================================================
 	StbImage(string filePath) {
 		buffer = stbi_load(filePath.c_str(), &width, &height, &bytesPerPixel, 4);
+		if (bytesPerPixel != 4) {
+			bytesPerPixel = 4;
+		}
 		BindBufferToPixelMap();
 	}
 
@@ -53,11 +69,7 @@ public:
 	// Copy the image into this class.
 	//=====================================================
 	StbImage& operator= (const StbImage& other) {
-		if (buffer) {
-			free(buffer);
-			delete pixels;
-			delete pixelMap;
-		}
+		DeleteData();
 
 		height = other.height;
 		width = other.width;
@@ -73,11 +85,7 @@ public:
 	// Destructor.
 	//=====================================================
 	~StbImage() {
-		if (buffer) {
-			free(buffer);
-			delete pixels;
-			delete pixelMap;
-		}	
+		DeleteData();
 	}
 
 	//=====================================================
@@ -134,35 +142,6 @@ public:
 	//=====================================================
 	int GetNumOfPixel() {
 		return height * width;
-	}
-
-	//=====================================================
-	// Transfer this image into a grayscale image.
-	//=====================================================
-	bool ToGrayscale() {
-		if (!buffer) return false;
-
-		int num = GetNumOfPixel();
-		for (int i = 0; i < num; i++) {
-			Color4f color = pixels[i].GetColor4f();
-			pixels[i] = color[0] * 0.3f + color[1] * 0.59f + color[2] * 0.11f;
-		}
-
-		return true;
-	}
-
-	//=====================================================
-	// Transfer each pixel into its complementary color.
-	//=====================================================
-	bool ToComplementary() {
-		if (!buffer) return false;
-
-		int num = GetNumOfPixel();
-		for (int i = 0; i < num; i++) {
-			pixels[i] = pixels[i].GetColor4c().GetComplementaryColor();
-		}
-
-		return true;
 	}
 
 	//=====================================================
@@ -231,7 +210,7 @@ public:
 			}
 		}
 
-		*this = newImage;
+		MoveData(*this, newImage);
 		return true;
 	}
 
@@ -260,7 +239,99 @@ public:
 		return true;
 	}
 
-private:
+	//=====================================================
+	// Transfer this image into a grayscale image.
+	//=====================================================
+	bool ToGrayscale() {
+		if (!buffer) return false;
+
+		int num = GetNumOfPixel();
+		for (int i = 0; i < num; i++) {
+			Color4f color = pixels[i].GetColor4f();
+			pixels[i] = color[0] * 0.3f + color[1] * 0.59f + color[2] * 0.11f;
+		}
+
+		return true;
+	}
+
+	//=====================================================
+	// Transfer each pixel into its complementary color.
+	//=====================================================
+	bool ToComplementary() {
+		if (!buffer) return false;
+
+		int num = GetNumOfPixel();
+		for (int i = 0; i < num; i++) {
+			pixels[i] = pixels[i].GetColor4c().GetComplementaryColor();
+		}
+
+		return true;
+	}
+
+	bool GaussianFilter(unsigned int filterSize) {
+		if (!buffer) return false;
+
+		double* filter = new double[filterSize * filterSize];
+		double sum = MyMath::GenerateGaussianMatrix(filter, filterSize, 0.5);
+
+		StbImage result(height, width);
+		for (int i = 0; i < height; i++) {
+			for (int j = 0; j < width; j++) {
+				result[i][j] = GetColorByFilter(i, j, filter, filterSize, sum);
+			}
+		}
+
+		MoveData(*this, result);
+		return true;
+	}
+
+	bool BartlettFilter(unsigned int filterSize) {
+		if (!buffer) return false;
+
+		double* filter = new double[filterSize * filterSize];
+		double sum = MyMath::GenerateBartlettMatrix(filter, filterSize, 0.5);
+
+		StbImage result(height, width);
+		for (int i = 0; i < height; i++) {
+			std::cout << i << endl;
+			for (int j = 0; j < width; j++) {
+				result[i][j] = GetColorByFilter(i, j, filter, filterSize, sum);
+			}
+		}
+
+		MoveData(*this, result);
+		return true;
+	}
+
+	friend void CopyData(StbImage&  dst, StbImage&  src) {
+		dst.DeleteData();
+
+		dst.buffer   = src.buffer;
+		dst.pixels   = src.pixels;
+		dst.pixelMap = src.pixelMap;
+		dst.height   = src.height;
+		dst.width    = src.width;
+		dst.bytesPerPixel = src.bytesPerPixel;
+	}
+
+	friend void MoveData(StbImage&  dst, StbImage&  src) {
+		CopyData(dst, src);
+
+		src.buffer   = 0;
+		src.pixels   = 0;
+		src.pixelMap = 0;
+		src.height   = 0;
+		src.width    = 0;
+	}
+
+	friend void SwapData(StbImage& img1, StbImage& img2) {
+		StbImage temp;
+		CopyData(temp, img1);
+		CopyData(img1, img2);
+		MoveData(img2, temp);
+	}
+
+protected:
 	void BindBufferToPixelMap() {
 		pixels = new Pixel[height * width];
 		pixelMap = new Pixel*[height];
@@ -303,6 +374,15 @@ private:
 		);
 	}
 
+	bool DeleteData() {
+		if (!buffer) return false;
+		
+		free(buffer);
+		delete pixels;
+		delete pixelMap;
+		return true;
+	}
+
 private:
 	// The all pixel data of the image.
 	uchar* buffer = 0;
@@ -316,5 +396,7 @@ private:
 	int width = 0;
 	// The number of bytes of each pixel.
 	int bytesPerPixel = 4;
+
+	friend class MikouImage;
 
 };

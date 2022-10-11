@@ -50,7 +50,27 @@ namespace MyMath {
 			}
 		}
 
-		delete seq;
+		delete[] seq;
+		return sum;
+	}
+
+	double GenerateBartlettMatrix(double* buffer, int size, double multiplier = 1) {
+		int* seq = new int[size];
+		for (int i = 0; i <= size / 2; i++) {
+			seq[i] = i + 1;
+			seq[size - i - 1] = i + 1;
+		}
+
+		double sum = 0;
+		for (int i = 0; i < size; i++) {
+			for (int j = 0; j < size; j++) {
+				double val = double(seq[i] * seq[j]) * multiplier;
+				buffer[i * size + j] = val;
+				sum += val;
+			}
+		}
+
+		delete[] seq;
 		return sum;
 	}
 };
