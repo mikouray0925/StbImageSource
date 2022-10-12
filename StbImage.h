@@ -398,5 +398,4 @@ private:
 	int bytesPerPixel = 4;
 
 	friend class MikouImage;
-
 };

@@ -13,10 +13,10 @@ int main() {
 		else if (order == '@') {
 			string inputPath, outputPath;
 			cin >> inputPath >> outputPath;
-			int tileNum, brightness;
-			cin >> tileNum >> brightness;
+			int tileNum, imgBrightness, noiseBrightness;
+			cin >> tileNum >> imgBrightness >> noiseBrightness;
 			StbImage img(inputPath);
-			MikouImage(img, tileNum, brightness).ToEncodedStbImage().SavePngFile(outputPath);
+			MikouImage(img, tileNum, imgBrightness, noiseBrightness).ToEncodedStbImage().SavePngFile(outputPath);
 		}
 	}
 }
